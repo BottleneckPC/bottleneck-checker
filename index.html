@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bottleneck Checker - CPU &amp; GPU compatibility</title>
+<meta name="description" content="A free, open-source CPU and GPU bottleneck checker. Reports an honest performance range, weighted by resolution and game type - not a fake single percentage.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d1014'/%3E%3Cpath d='M8 8h16M11 14h10M14 20h4M15 24h2' stroke='%234d9bf0' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="Bottleneck Checker home">
+      <svg class="glyph" viewBox="0 0 32 32" aria-hidden="true"><path d="M6 7h20M9 13h14M13 19h6M14.5 25h3" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+      <span class="brand-name">Bottleneck<span class="brand-name-accent">Checker</span></span>
+    </a>
+    <nav class="topnav">
+      <a href="https://github.com/bottleneckpc/bottleneck-checker" rel="noopener">Source</a>
+      <a class="btn-ghost" href="https://bottleneckpc.com" rel="noopener">Full tools &rsaquo;</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="intro">
+      <h1>Will your CPU and GPU hold each other back?</h1>
+      <p class="lede">Pick a processor and a graphics card. You get an <em>honest range</em>, not a fake single percentage, because the same pairing behaves differently from one game to the next.</p>
+    </section>
+
+    <section class="panel inputs" aria-label="Your hardware">
+      <div class="field">
+        <label class="field-label" for="cpu-input">Processor <span class="field-hint">CPU</span></label>
+        <div class="combo" data-kind="cpu">
+          <input id="cpu-input" class="combo-input" type="text" placeholder="Search 300+ CPUs..." autocomplete="off" role="combobox" aria-expanded="false" aria-controls="cpu-list">
+          <button class="combo-clear" type="button" aria-label="Clear" hidden>&times;</button>
+          <ul id="cpu-list" class="combo-list" role="listbox" hidden></ul>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="gpu-input">Graphics card <span class="field-hint">GPU</span></label>
+        <div class="combo" data-kind="gpu">
+          <input id="gpu-input" class="combo-input" type="text" placeholder="Search 140+ GPUs..." autocomplete="off" role="combobox" aria-expanded="false" aria-controls="gpu-list">
+          <button class="combo-clear" type="button" aria-label="Clear" hidden>&times;</button>
+          <ul id="gpu-list" class="combo-list" role="listbox" hidden></ul>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="control">
+          <span class="control-label">Resolution</span>
+          <div class="segmented" id="seg-res" role="radiogroup" aria-label="Resolution">
+            <button type="button" role="radio" data-val="1080p" aria-checked="false">1080p</button>
+            <button type="button" role="radio" data-val="1440p" aria-checked="true">1440p</button>
+            <button type="button" role="radio" data-val="4k" aria-checked="false">4K</button>
+          </div>
+        </div>
+        <div class="control">
+          <span class="control-label">Mostly playing</span>
+          <div class="segmented" id="seg-genre" role="radiogroup" aria-label="Game type">
+            <button type="button" role="radio" data-val="mixed" aria-checked="true">Mixed</button>
+            <button type="button" role="radio" data-val="esports" aria-checked="false">Esports</button>
+            <button type="button" role="radio" data-val="aaa" aria-checked="false">AAA</button>
+            <button type="button" role="radio" data-val="simulation" aria-checked="false">Sim</button>
+            <button type="button" role="radio" data-val="mmo" aria-checked="false">MMO</button>
+          </div>
+        </div>
+        <div class="control control-toggle">
+          <span class="control-label">DLSS / FSR upscaling</span>
+          <button type="button" class="toggle" id="toggle-upscale" role="switch" aria-checked="false">
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-text">Off</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="result-area" aria-live="polite">
+      <div class="placeholder" id="placeholder">
+        <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 12h32M13 22h22M19 32h10M22 40h4" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+        <p>Choose a CPU and a GPU to see the verdict.</p>
+      </div>
+
+      <div class="result panel" id="result" hidden>
+        <div class="verdict">
+          <div class="verdict-main">
+            <span class="verdict-tag" id="verdict-tag">Balanced</span>
+            <h2 class="verdict-headline" id="verdict-headline"></h2>
+          </div>
+          <span class="confidence" id="confidence" title="How likely this verdict holds across games">
+            <span class="confidence-dot"></span><span id="confidence-text">medium confidence</span>
+          </span>
+        </div>
+
+        <div class="meter">
+          <div class="meter-scale">
+            <span>CPU-limited</span><span>Balanced</span><span>GPU-limited</span>
+          </div>
+          <div class="meter-track" id="meter-track">
+            <div class="meter-mid"></div>
+            <div class="meter-marker" id="meter-marker"><span class="meter-marker-value" id="meter-value"></span></div>
+          </div>
+        </div>
+
+        <div class="readouts">
+          <div class="util">
+            <div class="util-row">
+              <span class="util-name">CPU load share</span>
+              <span class="util-val mono" id="cpu-util-val">--</span>
+            </div>
+            <div class="util-bar"><span id="cpu-util-fill"></span></div>
+            <div class="util-row">
+              <span class="util-name">GPU load share</span>
+              <span class="util-val mono" id="gpu-util-val">--</span>
+            </div>
+            <div class="util-bar util-bar-alt"><span id="gpu-util-fill"></span></div>
+          </div>
+          <div class="fps">
+            <span class="fps-label">Rough FPS at these settings</span>
+            <span class="fps-num mono" id="fps-num">--</span>
+            <span class="fps-sub" id="fps-sub">balanced preset · honest estimate</span>
+          </div>
+        </div>
+
+        <p class="explanation" id="explanation"></p>
+
+        <div class="cta">
+          <span>Want build recommendations, live prices, and per-game FPS?</span>
+          <a href="https://bottleneckpc.com/bottleneck-checker" rel="noopener">Open the full toolkit at BottleneckPC &rsaquo;</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-note">
+      Open source (MIT). Hardware data is a static snapshot from
+      <a href="https://bottleneckpc.com" rel="noopener">bottleneckpc.com</a> - no live server calls.
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/bottleneckpc/bottleneck-checker" rel="noopener">GitHub</a>
+      <span class="dot-sep">&middot;</span>
+      <a href="https://bottleneckpc.com" rel="noopener">BottleneckPC</a>
+    </div>
+  </footer>
+
+</div>
+<script type="module" src="app.js"></script>
+</body>
+</html>
