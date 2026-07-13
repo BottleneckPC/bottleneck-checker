@@ -4,7 +4,7 @@ A free, open-source **CPU and GPU bottleneck checker**. Pick a processor and a g
 
 **Live demo:** [bottleneckpc.github.io/bottleneck-checker](https://bottleneckpc.github.io/bottleneck-checker)
 
-> Built and maintained by [BottleneckPC](https://bottleneckpc.com). If you want build recommendations, live prices, and per-game FPS, that's on the site.
+> Built and maintained by [BottleneckPC](https://bottleneckpc.com/bottleneck-checker). The full [bottleneck calculator](https://bottleneckpc.com/bottleneck-checker) on the site adds build recommendations, live prices, and per-game FPS.
 
 ## Why another bottleneck calculator?
 
